@@ -13,7 +13,7 @@ Then site specific
 
 
 //Site type names used at the command line etc
-char *DownloadTypes[]={"none","generic","youtube","metacafe","dailymotion","break","ehow","vimeo","vbox7","blip.tv","ted","myvideo","mytopclip","redbalcony","mobango","yale","princeton","reuters","liveleak","academicearth","photobucket","aljazeera","mefeedia","iviewtube","washingtonpost","cbsnews","france24","euronews","metatube","motionfeeds","escapist","guardian","redorbit","scivee","izlese","uctv.tv","royalsociety.tv","britishacademy","kitp","dotsub","astronomy.com","teachertube.com","discovery","bloomberg","nationalgeographic","videobash","ibtimes","smh","videojug","animehere","funnyordie",NULL};
+char *DownloadTypes[]={"none","generic","youtube","metacafe","dailymotion","break","ehow","vimeo","vbox7","blip.tv","ted","myvideo","mytopclip","redbalcony","mobango","yale","princeton","reuters","liveleak","academicearth","photobucket","aljazeera","mefeedia","iviewtube","washingtonpost","cbsnews","france24","euronews","metatube","motionfeeds","escapist","guardian","redorbit","scivee","izlese","uctv.tv","royalsociety.tv","britishacademy","kitp","dotsub","astronomy.com","teachertube.com","discovery","bloomberg","nationalgeographic","videobash","ibtimes","smh","videojug","animehere","funnyordie","xvideos",NULL};
 
 //Longer names used in display
 char *DownloadNames[]={"none",
@@ -67,6 +67,7 @@ char *DownloadNames[]={"none",
 "www.videojug.com",
 "www.animehere.com",
 "Funny or Die (http://www.funnyordie.com)",
+"www.xvideos.com",
 NULL};
 
 //"http://vimeo.com/33204284",
@@ -122,6 +123,7 @@ char *TestLinks[]={"", "",
 "http://www.videojug.com/film/how-to-do-the-best-card-trick-in-the-world",
 "http://www.animehere.com/accel-world-episode-1.html",
 "http://www.funnyordie.com/videos/032785be3a/genie-on-hard-times-with-parker-posey?playlist=featured_videos",
+"http://www.xvideos.com//video9673470/_sienna_dream",
 NULL};
 
 
@@ -341,7 +343,10 @@ else if (strstr(Server,".google."))
 {
  Type=TYPE_GOOGLE_URL;
 }
-
+else if (strstr(Server,"xvideos"))
+{
+ Type=TYPE_XVIDEOS;
+}
 return(Type);
 }
 
@@ -869,6 +874,11 @@ break;
 case TYPE_ANIMEHERE:
  	Tempstr=SubstituteVarsInString(Tempstr,"$(ID)",Vars,0);
   RetVal=DownloadPage(Tempstr,TYPE_ANIMEHERE_STAGE2, Title,Flags);
+break;
+
+case TYPE_XVIDEOS:
+ 	Tempstr=SubstituteVarsInString(Tempstr,"$(ID)",Vars,0);
+  RetVal=DownloadItem(Tempstr, Title, Fmt, Flags);
 break;
 
 case TYPE_KAVLIINSTITUTE_STAGE2:
@@ -2246,7 +2256,22 @@ case TYPE_GOOGLE_URL:
 		SetVar(Vars,"item:reference",URL);
 break;
 
+case TYPE_XVIDEOS:
+#define XVIDEO_TITLE_START "<title>"
+#define XVIDEO_TITLE_END  "</title>"
+#define XVIDEO_VIDEO_START "flv_url="
+#define XVIDEO_VIDEO_END "&amp;url_bigthumb"
 
+    if (strstr(Tempstr,XVIDEO_VIDEO_START))
+	{
+		GenericExtractFromLine(Tempstr, "Title",XVIDEO_TITLE_START,XVIDEO_TITLE_END,Vars,EXTRACT_DEQUOTE | EXTRACT_NOSPACES);
+    } 
+    if (strstr(Tempstr,XVIDEO_VIDEO_START))
+	{
+		GenericExtractFromLine(Tempstr, "item:flv",XVIDEO_VIDEO_START,XVIDEO_VIDEO_END,Vars,EXTRACT_DEQUOTE | EXTRACT_NOSPACES);
+	}
+break;
+   
 
 case TYPE_MYTOPCLIP:
 case TYPE_PRINCETON:
